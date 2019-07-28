@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.djin.springboot.mapper.CountryMapper">
+	
+    <!-- 自定义的部门结果集 -->
+    <resultMap type="Country" id="countryMap">
+       <id property="leader" column="leader"/>
+       <result property="dname" column="dname"/>
+       <result property="loc" column="loc"/>
+    </resultMap>
+
+
+    <!--sql语句的片段,要查询的字段-->
+    <sql id="selCloumnCountry">
+        leader,dname,loc
+    </sql>
+
+
+    <!--根据id查询单个部门数据-->
+    <select id="selectCountryById" resultMap="countryMap">
+        select <include refid="selCloumnCountry"/> from country where leader=#{leader}
+
+    </select>
+
+
+    <!--查询所有部门数据-->
+    <select id="selectAllCountry" resultMap="countryMap">
+        select <include refid="selCloumnCountry"/> from country
+    </select>
+
+
+
+
+    
+</mapper>

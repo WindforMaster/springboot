@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.djin.springboot.mapper.EmpMapper">
+	
+    <!-- 自定义的商品结果集 -->
+    <resultMap type="Emp" id="empMap">
+       <id property="id" column="id"/>
+       <result property="name" column="name"/>
+       <result property="age" column="age"/>
+       <result property="sex" column="sex"/>
+       <result property="salary" column="salary"/>
+       <result property="bonus" column="bonus"/>
+       <result property="birth" column="birth"/>
+       <result property="hiredate" column="hiredate"/>
+       <result property="leader" column="leader"/>
+    </resultMap>
+
+
+    <!--配置查询员工和其所在的部门数据的自定义结果集-->
+    <resultMap id="empAndSelCountryMap" type="Emp" extends="empMap">
+        <!--配置的为: 嵌套查询   你使用到这个数据就会去查询,不适用就不查询-->
+        <association property="country" column="leader" select="cn.com.djin.springboot.mapper.CountryMapper.selectCountryById"/>
+        <!--预先抓取-->
+       <!-- <association property="" column="" resultMap=""/>-->
+    </resultMap>
+
+    <!--sql语句的片段,要查询的字段-->
+    <sql id="selCloumnEmp">
+        id,name,age,sex,salary,bonus,birth,hiredate,leader
+    </sql>
+    <!--根据条件查询员工-->
+    <select id="selectEmpByPramas" resultMap="empAndSelCountryMap">
+        select <include refid="selCloumnEmp"/> from emp where 1=1
+        <if test="emp.name!=null and emp.name!=''">
+          and name like concat("%",#{emp.name},"%")
+        </if>
+        <if test="emp.leader!=null and emp.leader!=0">
+         and leader=#{emp.leader}
+        </if>
+         order by id desc limit #{currentRecord},#{limit}
+    </select>
+
+
+    <!--获取数据条数-->
+    <select id="getEmpCountByPramas" resultType="java.lang.Integer">
+        select count(*) from emp where 1=1
+        <if test="emp.name!=null and emp.name!=''">
+            and name like concat("%",#{emp.name},"%")
+        </if>
+        <if test="emp.leader!=null and emp.leader!=0">
+            and leader=#{emp.leader}
+        </if>
+    </select>
+
+
+    <!--根据id删除员工数据-->
+    <delete id="delEmpById">
+        delete from emp where id=#{id}
+    </delete>
+
+    <!--动态修改员工数据-->
+    <update id="updEmp">
+        update emp
+        <set>
+            <if test="name!=null and name!=''">
+               name=#{name},
+            </if>
+            <if test="age!=null and age!=0">
+                age=#{age},
+            </if>
+            <if test="sex!=null and sex!=''">
+                sex=#{sex},
+            </if>
+            <if test="salary!=null and salary!=0">
+                salary=#{salary},
+            </if>
+            <if test="bonus!=null and bonus!=0">
+                bonus=#{bonus},
+            </if>
+            <if test="birth!=null">
+                birth=#{birth},
+            </if>
+            <if test="hiredate!=null">
+                hiredate=#{hiredate},
+            </if>
+            <if test="leader!=null and leader!=0">
+                leader=#{leader},
+            </if>
+
+        </set>
+
+        where id=#{id}
+    </update>
+
+
+
+    <!--添加员工-->
+    <insert id="insEmp">
+        insert into emp (id,name,age,sex,salary,bonus,birth,hiredate,leader) values(null,#{name},#{age},#{sex},#{salary},#{bonus},#{birth},#{hiredate},#{leader})
+    </insert>
+    
+    
+    <!--批量删除员工数据-->
+    <delete id="delBatchEmpByIds">
+        delete from emp where id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+             #{item}
+        </foreach>
+    </delete>
+    
+</mapper>
